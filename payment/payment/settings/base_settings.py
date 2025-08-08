@@ -92,6 +92,7 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE
 # Application definition
 INSTALLED_APPS = [
     # my apps
+    'payment.apps.users',
     'payment.apps.common',
     # Third party apps
     'rest_framework_simplejwt.token_blacklist',
@@ -137,6 +138,9 @@ if ENABLE_SOCIAL_AUTH:
         'social_core.backends.facebook.FacebookOAuth2',
         'social_core.backends.google.GoogleOAuth2',
     ]
+
+# Custom user model
+AUTH_USER_MODEL = 'users.User'
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Payment API',

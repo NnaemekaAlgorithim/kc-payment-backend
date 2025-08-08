@@ -27,6 +27,13 @@ urlpatterns = [
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    
+    # ReDoc documentation at root
+    path('', SpectacularRedocView.as_view(url_name='schema'), name='root-redoc'),
+    
+    # App URLs
+    path('', include('payment.apps.common.urls', namespace='common')),
+    path('', include('payment.apps.users.urls', namespace='users')),
 ]
 
 # Add a prefix for deployment (e.g., 'dev' or 'prod') if BASE_PREFIX is set

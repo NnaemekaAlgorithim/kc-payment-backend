@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to {{ site_name }}!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .content {
+            background: #f9f9f9;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            border: 1px solid #ddd;
+        }
+        .welcome-box {
+            background: #e8f5e8;
+            border-left: 4px solid #4CAF50;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .feature-list {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border: 1px solid #e0e0e0;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            background: #4CAF50;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: inline-block;
+        }
+        .cta-button {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎉 Welcome to {{ site_name }}!</h1>
+        <p>Your account has been successfully activated</p>
+    </div>
+    
+    <div class="content">
+        <div class="welcome-box">
+            <h2>Hello {{ user.first_name }},</h2>
+            <p><strong>Congratulations!</strong> Your {{ site_name }} account has been successfully activated and you're now ready to explore all our features.</p>
+        </div>
+        
+        <p>Thank you for joining our community! We're excited to have you on board and look forward to providing you with an excellent experience.</p>
+        
+        <div class="feature-list">
+            <h3>What you can do now:</h3>
+            
+            <div class="feature-item">
+                <span class="feature-icon"></span>
+                <span>Access your personalized dashboard</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon"></span>
+                <span>Manage your profile and preferences</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon"></span>
+                <span>Explore all available features and services</span>
+            </div>
+            
+            <div class="feature-item">
+                <span class="feature-icon"></span>
+                <span>Get support from our dedicated team</span>
+            </div>
+        </div>
+        
+        <p><strong>Account Details:</strong></p>
+        <ul>
+            <li><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</li>
+            <li><strong>Email:</strong> {{ user.email }}</li>
+            <li><strong>Account Status:</strong> Active ✅</li>
+            <li><strong>Member Since:</strong> {{ user.date_joined|date:"F d, Y" }}</li>
+        </ul>
+        
+        <div style="text-align: center;">
+            <a href="{{ login_url }}" class="cta-button">Get Started Now</a>
+        </div>
+        
+        <p>If you have any questions or need assistance, don't hesitate to contact our support team. We're here to help!</p>
+        
+        <p>Welcome aboard and enjoy your journey with {{ site_name }}!</p>
+        
+        <p>Best regards,<br>
+        The {{ site_name }} Team</p>
+    </div>
+    
+    <div class="footer">
+        <p>Need help? Contact us at support@{{ site_domain }}</p>
+        <p>&copy; 2024 {{ site_name }}. All rights reserved.</p>
+    </div>
+</body>
+</html>
