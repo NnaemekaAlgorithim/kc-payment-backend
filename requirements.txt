@@ -45,6 +45,10 @@ djoser==2.2.3
 cloudinary==1.40.0
 django-cloudinary-storage==0.3.0
 
+# Google Cloud Platform Storage
+google-cloud-storage==2.13.0
+django-storages[google]==1.14.2
+
 # Image Processing
 Pillow==10.4.0
 

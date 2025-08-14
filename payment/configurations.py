@@ -30,6 +30,16 @@ CLOUDINARY_CLOUD_NAME = config('CLOUDINARY_CLOUD_NAME', default='')
 CLOUDINARY_API_KEY = config('CLOUDINARY_API_KEY', default='')
 CLOUDINARY_API_SECRET = config('CLOUDINARY_API_SECRET', default='')
 
+# Google Cloud Platform (GCP) Storage settings
+USE_GCP_STORAGE = config('USE_GCP_STORAGE', default=False, cast=bool)
+GCP_PROJECT_ID = config('GCP_PROJECT_ID', default='')
+GCP_STORAGE_BUCKET_NAME = config('GCP_STORAGE_BUCKET_NAME', default='')
+GCP_SERVICE_ACCOUNT_FILE = config('GCP_SERVICE_ACCOUNT_FILE', default='')
+GCP_SERVICE_ACCOUNT_JSON = config('GCP_SERVICE_ACCOUNT_JSON', default='')
+GCP_LOCATION = config('GCP_LOCATION', default='us-central1')
+GCP_FILE_OVERWRITE = config('GCP_FILE_OVERWRITE', default=False, cast=bool)
+GCP_DEFAULT_ACL = config('GCP_DEFAULT_ACL', default='publicRead')
+
 # Database settings
 DB_HOST_NAME = config('DB_HOST_NAME', default='localhost')
 DB_PORT = config('DB_PORT', default=5432, cast=int)

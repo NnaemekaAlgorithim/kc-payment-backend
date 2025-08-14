@@ -37,6 +37,14 @@ from payment.configurations import (
     CLOUDINARY_CLOUD_NAME,
     CLOUDINARY_API_KEY,
     CLOUDINARY_API_SECRET,
+    USE_GCP_STORAGE,
+    GCP_PROJECT_ID,
+    GCP_STORAGE_BUCKET_NAME,
+    GCP_SERVICE_ACCOUNT_FILE,
+    GCP_SERVICE_ACCOUNT_JSON,
+    GCP_LOCATION,
+    GCP_FILE_OVERWRITE,
+    GCP_DEFAULT_ACL,
     DATABASE_URL,
     REDIS_URL,
     STRIPE_SECRET_KEY,
@@ -94,6 +102,7 @@ INSTALLED_APPS = [
     # my apps
     'payment.apps.users',
     'payment.apps.common',
+    'payment.apps.transactions',
     # Third party apps
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework',
@@ -217,20 +226,48 @@ STRIPE_SECRET_KEY = STRIPE_SECRET_KEY
 STRIPE_PUBLISHABLE_KEY = STRIPE_PUBLISHABLE_KEY
 STRIPE_WEBHOOK_SECRET = STRIPE_WEBHOOK_SECRET
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
-    'API_KEY': CLOUDINARY_API_KEY,
-    'API_SECRET': CLOUDINARY_API_SECRET,
-}
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
-# Import cloudinary after settings are defined to avoid circular imports
-import cloudinary
-cloudinary.config(
-    cloud_name=CLOUDINARY_CLOUD_NAME,
-    api_key=CLOUDINARY_API_KEY,
-    api_secret=CLOUDINARY_API_SECRET,
-)
+# File Storage Configuration
+if USE_GCP_STORAGE:
+    # Google Cloud Platform Storage
+    DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+    STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+    
+    GS_BUCKET_NAME = GCP_STORAGE_BUCKET_NAME
+    GS_PROJECT_ID = GCP_PROJECT_ID
+    GS_LOCATION = GCP_LOCATION
+    GS_FILE_OVERWRITE = GCP_FILE_OVERWRITE
+    GS_DEFAULT_ACL = GCP_DEFAULT_ACL
+    
+    # Service account authentication
+    if GCP_SERVICE_ACCOUNT_FILE:
+        GS_CREDENTIALS = GCP_SERVICE_ACCOUNT_FILE
+    elif GCP_SERVICE_ACCOUNT_JSON:
+        import json
+        from google.oauth2 import service_account
+        GS_CREDENTIALS = service_account.Credentials.from_service_account_info(
+            json.loads(GCP_SERVICE_ACCOUNT_JSON)
+        )
+    
+    # Media URLs
+    GS_MEDIA_BUCKET_NAME = GCP_STORAGE_BUCKET_NAME
+    MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
+    
+else:
+    # Cloudinary Storage (fallback)
+    CLOUDINARY_STORAGE = {
+        'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
+        'API_KEY': CLOUDINARY_API_KEY,
+        'API_SECRET': CLOUDINARY_API_SECRET,
+    }
+    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    
+    # Import cloudinary after settings are defined to avoid circular imports
+    import cloudinary
+    cloudinary.config(
+        cloud_name=CLOUDINARY_CLOUD_NAME,
+        api_key=CLOUDINARY_API_KEY,
+        api_secret=CLOUDINARY_API_SECRET,
+    )
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
