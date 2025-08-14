@@ -1,0 +1,4 @@
+Test Barcode Image
+Receiver: Test Company
+Account: 1234567890
+SWIFT: TESTUS33XXX

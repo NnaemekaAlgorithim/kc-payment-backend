@@ -1,0 +1,5 @@
+Test Payment Slip
+Transaction Reference: TEST-001
+Amount: $500.00
+Date: 2025-08-14
+Bank: Test Bank

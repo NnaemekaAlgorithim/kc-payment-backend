@@ -52,6 +52,9 @@ from payment.configurations import (
     STRIPE_WEBHOOK_SECRET,
     CELERY_BROKER_URL,
     CELERY_RESULT_BACKEND,
+    FCM_SERVER_KEY,
+    FCM_SENDER_ID,
+    FCM_WEB_API_KEY,
     LOG_LEVEL
 )
 
@@ -103,6 +106,7 @@ INSTALLED_APPS = [
     'payment.apps.users',
     'payment.apps.common',
     'payment.apps.transactions',
+    'payment.apps.notifications',
     # Third party apps
     'rest_framework_simplejwt.token_blacklist',
     'rest_framework',
@@ -354,4 +358,23 @@ LOGGING = {
             'propagate': False,
         },
     },
+}
+
+# ==============================================================================
+# FIREBASE CLOUD MESSAGING (FCM) CONFIGURATION
+# ==============================================================================
+
+# FCM configuration
+FCM_SETTINGS = {
+    'FCM_SERVER_KEY': FCM_SERVER_KEY,
+    'FCM_SENDER_ID': FCM_SENDER_ID,
+    'FCM_WEB_API_KEY': FCM_WEB_API_KEY,
+}
+
+# Notification settings
+NOTIFICATION_SETTINGS = {
+    'DEFAULT_FROM_EMAIL': DEFAULT_FROM_EMAIL,
+    'ENABLE_EMAIL_NOTIFICATIONS': True,
+    'ENABLE_PUSH_NOTIFICATIONS': bool(FCM_SERVER_KEY),
+    'NOTIFICATION_BATCH_SIZE': 100,  # Max notifications to send in one batch
 }

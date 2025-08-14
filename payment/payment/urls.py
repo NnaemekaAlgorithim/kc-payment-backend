@@ -35,6 +35,7 @@ urlpatterns = [
     path('', include('payment.apps.common.urls', namespace='common')),
     path('', include('payment.apps.users.urls', namespace='users')),
     path('', include('payment.apps.transactions.urls', namespace='transactions')),
+    path('', include('payment.apps.notifications.urls', namespace='notifications')),
 ]
 
 # Add a prefix for deployment (e.g., 'dev' or 'prod') if BASE_PREFIX is set

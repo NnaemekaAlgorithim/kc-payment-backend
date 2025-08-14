@@ -315,25 +315,29 @@ class Transaction(BaseModel):
         if self.user_payment_slip:
             documents.append({
                 'type': 'user_payment_slip',
-                'file': self.user_payment_slip,
-                'url': self.user_payment_slip.url
+                'name': self.user_payment_slip.name,
+                'url': self.user_payment_slip.url,
+                'size': self.user_payment_slip.size
             })
         if self.receiver_barcode_image:
             documents.append({
                 'type': 'barcode_image',
-                'file': self.receiver_barcode_image,
-                'url': self.receiver_barcode_image.url
+                'name': self.receiver_barcode_image.name,
+                'url': self.receiver_barcode_image.url,
+                'size': self.receiver_barcode_image.size
             })
         if self.transaction_completion_document:
             documents.append({
                 'type': 'completion_document',
-                'file': self.transaction_completion_document,
-                'url': self.transaction_completion_document.url
+                'name': self.transaction_completion_document.name,
+                'url': self.transaction_completion_document.url,
+                'size': self.transaction_completion_document.size
             })
         if self.additional_completion_document:
             documents.append({
                 'type': 'additional_completion_document',
-                'file': self.additional_completion_document,
-                'url': self.additional_completion_document.url
+                'name': self.additional_completion_document.name,
+                'url': self.additional_completion_document.url,
+                'size': self.additional_completion_document.size
             })
         return documents

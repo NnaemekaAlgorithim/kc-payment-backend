@@ -66,5 +66,10 @@ SECURE_PROXY_SSL_HEADER = config('SECURE_PROXY_SSL_HEADER', default=False, cast=
 SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
 CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
 
+# Firebase Cloud Messaging (FCM) settings
+FCM_SERVER_KEY = config('FCM_SERVER_KEY', default='')
+FCM_SENDER_ID = config('FCM_SENDER_ID', default='')
+FCM_WEB_API_KEY = config('FCM_WEB_API_KEY', default='')
+
 # Logging
 LOG_LEVEL = config('LOG_LEVEL', default='INFO')

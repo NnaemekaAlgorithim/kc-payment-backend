@@ -80,12 +80,55 @@ class TransactionViewSet(viewsets.ModelViewSet):
         description="""
         Create a new payment transaction with status set to PENDING.
         
-        This endpoint allows authenticated users to initiate a new transaction by providing:
-        - Transaction details (amount, currency, description)
-        - User payment information (payment method, bank details, payment slip)
-        - Receiver information (account details, SWIFT code, barcode image)
+        **Content-Type: multipart/form-data** (for file uploads)
         
-        All file uploads are stored in Google Cloud Platform (GCP) Cloud Storage.
+        This endpoint allows authenticated users to initiate a new transaction by providing:
+        
+        **Required Fields:**
+        - `amount`: Transaction amount (decimal, e.g., "1000.00")
+        - `currency`: Currency code (e.g., "USD", "EUR", "GBP")
+        - `receiver_account_name`: Receiver's account holder name
+        - `receiver_account_number`: Receiver's account number
+        - `receiver_swift_code`: Receiver's bank SWIFT/BIC code
+        
+        **Optional User Payment Details:**
+        - `user_payment_method`: Payment method (e.g., "Bank Transfer")
+        - `user_bank_name`: User's bank name
+        - `user_account_name`: User's account holder name  
+        - `user_account_number`: User's account number
+        - `user_payment_reference`: Payment reference from user's bank
+        - `description`: Transaction description or memo
+        
+        **File Uploads (multipart/form-data):**
+        - `user_payment_slip`: Payment receipt/slip (PDF, JPG, PNG - max 10MB)
+        - `receiver_barcode_image`: Receiver's barcode image (JPG, PNG - max 5MB)
+        
+        **File Upload Requirements:**
+        - Supported formats: PDF, JPG, JPEG, PNG, GIF
+        - Payment slip max size: 10MB
+        - Barcode image max size: 5MB
+        - Files are stored in Google Cloud Platform (GCP) Cloud Storage
+        
+        **Example using cURL:**
+        ```bash
+        curl -X POST http://localhost:8000/api/transactions/ \\
+          -H "Authorization: Bearer YOUR_JWT_TOKEN" \\
+          -F "amount=1000.00" \\
+          -F "currency=USD" \\
+          -F "receiver_account_name=John Doe Business" \\
+          -F "receiver_account_number=1234567890" \\
+          -F "receiver_swift_code=CHASUS33XXX" \\
+          -F "description=Payment for services" \\
+          -F "user_payment_method=Bank Transfer" \\
+          -F "user_bank_name=Wells Fargo" \\
+          -F "user_account_name=Jane Smith" \\
+          -F "user_account_number=9876543210" \\
+          -F "user_payment_reference=WF123456789" \\
+          -F "user_payment_slip=@/path/to/payment-receipt.pdf" \\
+          -F "receiver_barcode_image=@/path/to/barcode.jpg"
+        ```
+        
+        All file uploads are stored securely in Google Cloud Platform Cloud Storage.
         The transaction will be created with PENDING status and can be updated until processed by an admin.
         """,
         request=TransactionCreateSerializer,
@@ -102,22 +145,39 @@ class TransactionViewSet(viewsets.ModelViewSet):
         },
         examples=[
             OpenApiExample(
-                'Create Transaction',
-                summary='Example transaction creation',
-                description='Sample request for creating a new transaction',
+                'Create Transaction with Files',
+                summary='Example transaction creation with file uploads',
+                description='Sample multipart/form-data request for creating a transaction with file uploads',
                 value={
                     "amount": "1000.00",
                     "currency": "USD",
-                    "description": "Payment for services",
+                    "description": "Payment for services rendered",
                     "user_payment_method": "Bank Transfer",
                     "user_bank_name": "Chase Bank",
                     "user_account_name": "John Doe",
                     "user_account_number": "1234567890",
-                    "user_payment_reference": "TXN123456",
-                    "receiver_account_name": "Jane Smith",
+                    "user_payment_reference": "TXN123456789",
+                    "receiver_account_name": "Jane Smith Business",
                     "receiver_account_number": "9876543210",
-                    "receiver_swift_code": "CHASUS33"
+                    "receiver_swift_code": "CHASUS33XXX",
+                    # Files should be uploaded as multipart/form-data:
+                    # user_payment_slip: <file upload - PDF/Image of payment receipt>
+                    # receiver_barcode_image: <file upload - PNG/JPG of receiver's barcode>
                 },
+                request_only=True
+            ),
+            OpenApiExample(
+                'Minimal Transaction',
+                summary='Minimal required fields',
+                description='Minimum required fields to create a transaction',
+                value={
+                    "amount": "500.00",
+                    "currency": "USD",
+                    "receiver_account_name": "ABC Company Ltd",
+                    "receiver_account_number": "1122334455",
+                    "receiver_swift_code": "ABCDUS33"
+                },
+                request_only=True
             ),
         ],
         tags=["Transactions"]
@@ -812,6 +872,8 @@ class AdminTransactionViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         
         try:
+            # Set the admin user for notification purposes
+            instance._admin_user = request.user
             transaction = serializer.save()
             
             # Return updated transaction details
