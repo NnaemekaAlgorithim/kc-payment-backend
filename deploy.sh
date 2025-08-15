@@ -6,7 +6,7 @@ VENV_PATH="$PROJECT_DIR/venv"
 REPO_URL="https://github.com/NnaemekaAlgorithim/kc-payment-backend.git"  # Replace with your repo URL
 BRANCH="main"  # Replace with your branch name
 GUNICORN_SERVICE="payment_gunicorn"  # Adjusted to match the service name
-NGINX_SERVICE="nginx"
+NGINX_SERVICE="kcpayment"
 
 # Exit on any error
 set -e
@@ -39,12 +39,12 @@ pip install -r ../requirements.txt || { echo "Failed to install requirements"; e
 
 # Step 6: Run migrations
 echo "Running Django migrations..."
-python manage.py makemigrations || { echo "Makemigrations failed"; exit 1; }
-python manage.py migrate || { echo "Migrate failed"; exit 1; }
+python ../manage.py makemigrations || { echo "Makemigrations failed"; exit 1; }
+python ../manage.py migrate || { echo "Migrate failed"; exit 1; }
 
 # Step 7: Collect static files
 echo "Collecting static files..."
-python manage.py collectstatic --noinput || { echo "Collectstatic failed"; exit 1; }
+python ../manage.py collectstatic --noinput || { echo "Collectstatic failed"; exit 1; }
 
 # Step 8: Set permissions for static files and socket
 echo "Setting permissions..."
