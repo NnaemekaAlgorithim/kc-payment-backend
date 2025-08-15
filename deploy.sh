@@ -1,11 +1,11 @@
 #!/bin/bash
 
 # Configuration
-PROJECT_DIR="/home/$USER/payment-backend"
+PROJECT_DIR="/home/$USER/kc-payment-backend"
 VENV_PATH="$PROJECT_DIR/venv"
-REPO_URL="https://github.com/YourUsername/payment-backend.git"  # Replace with your repo URL
+REPO_URL="https://github.com/NnaemekaAlgorithim/kc-payment-backend.git"  # Replace with your repo URL
 BRANCH="main"  # Replace with your branch name
-GUNICORN_SERVICE="gunicorn_payment"
+GUNICORN_SERVICE="payment_gunicorn"  # Adjusted to match the service name
 NGINX_SERVICE="nginx"
 
 # Exit on any error
