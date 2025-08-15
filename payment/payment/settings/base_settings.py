@@ -315,6 +315,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 BASE_PREFIX = BASE_PREFIX
 
+# Ensure logs directory exists before logging config
+LOG_DIR = os.path.join(PROJECT_ROOT, 'logs')
+os.makedirs(LOG_DIR, exist_ok=True)  # Create logs directory if missing
+
 # Logging Configuration
 LOGGING = {
     'version': 1,
@@ -336,7 +340,7 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(PROJECT_ROOT, 'logs', 'django.log'),
+            'filename': os.path.join(LOG_DIR, 'django.log'),
             'maxBytes': 1024*1024*15,  # 15MB
             'backupCount': 10,
             'formatter': 'verbose',
