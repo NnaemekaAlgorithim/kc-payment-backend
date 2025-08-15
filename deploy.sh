@@ -6,7 +6,7 @@ VENV_PATH="$PROJECT_DIR/venv"
 REPO_URL="https://github.com/NnaemekaAlgorithim/kc-payment-backend.git"  # Replace with your repo URL
 BRANCH="main"  # Replace with your branch name
 GUNICORN_SERVICE="payment_gunicorn"  # Adjusted to match the service name
-NGINX_SERVICE="kcpayment"
+NGINX_SERVICE="nginx"
 
 # Exit on any error
 set -e
