@@ -88,7 +88,25 @@ class ActivationSerializer(serializers.Serializer):
     """Serializer for account activation."""
     
     email = serializers.EmailField()
-    otp = serializers.CharField(max_length=6, min_length=6)
+    otp = serializers.CharField(max_length=6, min_length=6, required=False)
+    resend = serializers.BooleanField(default=False)
+    
+    def validate(self, attrs):
+        """Cross-field validation."""
+        resend = attrs.get('resend', False)
+        otp = attrs.get('otp')
+        
+        # If resending, ignore any provided OTP
+        if resend:
+            attrs.pop('otp', None)  # Remove OTP from validated data if present
+        else:
+            # If not resending, OTP is required
+            if not otp:
+                raise serializers.ValidationError({
+                    'otp': ['OTP is required when not requesting resend.']
+                })
+        
+        return attrs
     
     def validate_email(self, value):
         """Validate that user exists."""

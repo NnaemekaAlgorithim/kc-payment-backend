@@ -137,7 +137,13 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @extend_schema(
         summary="Activate user account",
-        description="Activate a user account using the OTP code sent via email. Returns JWT tokens upon successful activation.",
+        description="""
+        Activate a user account using the OTP code sent via email. Returns JWT tokens upon successful activation.
+        
+        **Two modes of operation:**
+        1. **Activation mode** (resend=false): Verify OTP and activate account
+        2. **Resend mode** (resend=true): Send a new OTP to user's email
+        """,
         responses={
             200: {
                 "type": "object",
@@ -172,16 +178,18 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def activate(self, request):
         """
-        Activate a user account using OTP.
+        Activate a user account using OTP or resend a new OTP.
         
-        This endpoint activates a user account by verifying the OTP code
-        sent to their email during registration.
+        This endpoint has two modes:
+        1. Activation: Verify OTP and activate account (resend=false)
+        2. Resend: Send new OTP to user's email (resend=true)
         """
         serializer = self.get_serializer(data=request.data)
         
         if serializer.is_valid():
             email = serializer.validated_data['email']
-            otp = serializer.validated_data['otp']
+            otp = serializer.validated_data.get('otp')
+            resend = serializer.validated_data.get('resend', False)
             
             try:
                 user = User.objects.get(email=email)
@@ -193,47 +201,78 @@ class UserViewSet(viewsets.ModelViewSet):
                         'errors': {'general': ['Account is already active.']}
                     }, status=status.HTTP_400_BAD_REQUEST)
                 
-                # Verify OTP
-                if self.otp_manager.verify_otp(email, otp, 'activation'):
-                    user.is_active = True
-                    user.save()
-                    
-                    # Generate JWT tokens
-                    refresh = RefreshToken.for_user(user)
-                    access_token = refresh.access_token
-                    
-                    # Update last login since user is now activated and logged in
-                    user.last_login = timezone.now()
-                    user.save(update_fields=['last_login'])
-                    
-                    # Send welcome email
-                    self.email_service.send_welcome_email(user)
-                    
-                    logger.info(f"User activated successfully: {user.email}")
-                    
-                    return Response({
-                        'success': True,
-                        'message': 'Account activated successfully. You are now logged in.',
-                        'data': {
-                            'access_token': str(access_token),
-                            'refresh_token': str(refresh),
-                            'user': {
-                                'id': str(user.id),
+                # Handle resend OTP request
+                if resend:
+                    try:
+                        # Generate new OTP for email activation
+                        new_otp = self.otp_manager.generate_otp()
+                        self.otp_manager.store_otp(user.email, new_otp, 'activation')
+                        
+                        # Send activation email with new OTP
+                        self.email_service.send_activation_email(user, new_otp)
+                        
+                        logger.info(f"New activation OTP sent to: {user.email}")
+                        
+                        return Response({
+                            'success': True,
+                            'message': 'New activation code has been sent to your email.',
+                            'data': {
                                 'email': user.email,
-                                'first_name': user.first_name,
-                                'last_name': user.last_name,
-                                'full_name': f"{user.first_name} {user.last_name}".strip(),
-                                'is_active': user.is_active,
-                                'is_staff': user.is_staff
+                                'resent': True
                             }
-                        }
-                    }, status=status.HTTP_200_OK)
+                        }, status=status.HTTP_200_OK)
+                        
+                    except Exception as e:
+                        logger.error(f"OTP resend error: {str(e)}")
+                        return Response({
+                            'success': False,
+                            'message': 'Failed to send activation code. Please try again later.',
+                            'errors': {'general': ['An error occurred while sending the activation code.']}
+                        }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+                # Handle account activation
                 else:
-                    return Response({
-                        'success': False,
-                        'message': 'Invalid or expired OTP code.',
-                        'errors': {'otp': ['Invalid or expired OTP code.']}
-                    }, status=status.HTTP_400_BAD_REQUEST)
+                    # Verify OTP
+                    if self.otp_manager.verify_otp(email, otp, 'activation'):
+                        user.is_active = True
+                        user.save()
+                        
+                        # Generate JWT tokens
+                        refresh = RefreshToken.for_user(user)
+                        access_token = refresh.access_token
+                        
+                        # Update last login since user is now activated and logged in
+                        user.last_login = timezone.now()
+                        user.save(update_fields=['last_login'])
+                        
+                        # Send welcome email
+                        self.email_service.send_welcome_email(user)
+                        
+                        logger.info(f"User activated successfully: {user.email}")
+                        
+                        return Response({
+                            'success': True,
+                            'message': 'Account activated successfully. You are now logged in.',
+                            'data': {
+                                'access_token': str(access_token),
+                                'refresh_token': str(refresh),
+                                'user': {
+                                    'id': str(user.id),
+                                    'email': user.email,
+                                    'first_name': user.first_name,
+                                    'last_name': user.last_name,
+                                    'full_name': f"{user.first_name} {user.last_name}".strip(),
+                                    'is_active': user.is_active,
+                                    'is_staff': user.is_staff
+                                }
+                            }
+                        }, status=status.HTTP_200_OK)
+                    else:
+                        return Response({
+                            'success': False,
+                            'message': 'Invalid or expired OTP code.',
+                            'errors': {'otp': ['Invalid or expired OTP code.']}
+                        }, status=status.HTTP_400_BAD_REQUEST)
                     
             except User.DoesNotExist:
                 return Response({
