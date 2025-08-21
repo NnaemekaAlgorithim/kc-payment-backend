@@ -109,8 +109,8 @@ class ProfileViewSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'first_name', 'last_name', 'email', 'full_name', 
-                 'is_active', 'date_joined', 'created_at', 'updated_at')
-        read_only_fields = ('id', 'email', 'is_active', 'date_joined', 'created_at', 'updated_at')
+                 'is_active', 'date_joined', 'created_at', 'updated_at', 'is_staff')
+        read_only_fields = ('id', 'email', 'is_active', 'date_joined', 'created_at', 'updated_at', 'is_staff')
 
 
 class ProfileUpdateSerializer(serializers.ModelSerializer):

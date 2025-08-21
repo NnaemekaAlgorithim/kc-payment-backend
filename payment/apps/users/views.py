@@ -137,7 +137,7 @@ class UserViewSet(viewsets.ModelViewSet):
     
     @extend_schema(
         summary="Activate user account",
-        description="Activate a user account using the OTP code sent via email.",
+        description="Activate a user account using the OTP code sent via email. Returns JWT tokens upon successful activation.",
         responses={
             200: {
                 "type": "object",
@@ -147,9 +147,20 @@ class UserViewSet(viewsets.ModelViewSet):
                     "data": {
                         "type": "object",
                         "properties": {
-                            "user_id": {"type": "string"},
-                            "email": {"type": "string"},
-                            "is_active": {"type": "boolean"}
+                            "access_token": {"type": "string"},
+                            "refresh_token": {"type": "string"},
+                            "user": {
+                                "type": "object",
+                                "properties": {
+                                    "id": {"type": "string"},
+                                    "email": {"type": "string"},
+                                    "first_name": {"type": "string"},
+                                    "last_name": {"type": "string"},
+                                    "full_name": {"type": "string"},
+                                    "is_active": {"type": "boolean"},
+                                    "is_staff": {"type": "boolean"}
+                                }
+                            }
                         }
                     }
                 }
@@ -187,6 +198,14 @@ class UserViewSet(viewsets.ModelViewSet):
                     user.is_active = True
                     user.save()
                     
+                    # Generate JWT tokens
+                    refresh = RefreshToken.for_user(user)
+                    access_token = refresh.access_token
+                    
+                    # Update last login since user is now activated and logged in
+                    user.last_login = timezone.now()
+                    user.save(update_fields=['last_login'])
+                    
                     # Send welcome email
                     self.email_service.send_welcome_email(user)
                     
@@ -194,11 +213,19 @@ class UserViewSet(viewsets.ModelViewSet):
                     
                     return Response({
                         'success': True,
-                        'message': 'Account activated successfully. You can now log in.',
+                        'message': 'Account activated successfully. You are now logged in.',
                         'data': {
-                            'user_id': str(user.id),
-                            'email': user.email,
-                            'is_active': user.is_active
+                            'access_token': str(access_token),
+                            'refresh_token': str(refresh),
+                            'user': {
+                                'id': str(user.id),
+                                'email': user.email,
+                                'first_name': user.first_name,
+                                'last_name': user.last_name,
+                                'full_name': f"{user.first_name} {user.last_name}".strip(),
+                                'is_active': user.is_active,
+                                'is_staff': user.is_staff
+                            }
                         }
                     }, status=status.HTTP_200_OK)
                 else:
@@ -249,7 +276,8 @@ class UserViewSet(viewsets.ModelViewSet):
                                     "email": {"type": "string"},
                                     "first_name": {"type": "string"},
                                     "last_name": {"type": "string"},
-                                    "is_active": {"type": "boolean"}
+                                    "is_active": {"type": "boolean"},
+                                    "is_staff": {"type": "boolean"}
                                 }
                             }
                         }
@@ -306,7 +334,8 @@ class UserViewSet(viewsets.ModelViewSet):
                                 'email': user.email,
                                 'first_name': user.first_name,
                                 'last_name': user.last_name,
-                                'is_active': user.is_active
+                                'is_active': user.is_active,
+                                'is_staff': user.is_staff
                             }
                         }
                     }, status=status.HTTP_200_OK)
