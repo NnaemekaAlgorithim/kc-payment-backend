@@ -186,8 +186,8 @@ class Transaction(BaseModel):
         upload_to=transaction_file_upload_path,
         blank=True,
         null=True,
-        validators=[validate_supporting_document],
-        help_text="User's payment slip or proof of payment (PDF, image, etc.)"
+        validators=[validate_supporting_document],  # Now allows all file types
+        help_text="User's payment slip or proof of payment (any file type)"
     )
     
     # Receiver details
@@ -223,8 +223,8 @@ class Transaction(BaseModel):
         upload_to=transaction_file_upload_path,
         blank=True,
         null=True,
-        validators=[validate_barcode_image],
-        help_text="Receiver's barcode picture (PDF, PNG, JPG, etc.) - stored in GCP Cloud Storage"
+        validators=[validate_barcode_image],  # Now allows all file types
+        help_text="Receiver's barcode picture (any file type) - stored in GCP Cloud Storage"
     )
     
     # Transaction completion documents (uploaded by admin when completing transaction)
@@ -232,16 +232,16 @@ class Transaction(BaseModel):
         upload_to=transaction_file_upload_path,
         blank=True,
         null=True,
-        validators=[validate_supporting_document],
-        help_text="Transaction completion document uploaded by admin (receipt, confirmation, etc.)"
+        validators=[validate_supporting_document],  # Now allows all file types
+        help_text="Transaction completion document uploaded by admin (any file type)"
     )
     
     additional_completion_document = models.FileField(
         upload_to=transaction_file_upload_path,
         blank=True,
         null=True,
-        validators=[validate_supporting_document],
-        help_text="Additional completion document if needed (PDF, image, etc.)"
+        validators=[validate_supporting_document],  # Now allows all file types
+        help_text="Additional completion document if needed (any file type)"
     )
     
     # Additional transaction metadata

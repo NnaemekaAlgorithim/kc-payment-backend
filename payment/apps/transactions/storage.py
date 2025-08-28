@@ -10,47 +10,28 @@ from django.core.files.uploadedfile import UploadedFile
 class TransactionFileValidator:
     """Validator for transaction file uploads."""
     
-    ALLOWED_EXTENSIONS = {
-        'image': ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'],
-        'pdf': ['.pdf'],
-        'document': ['.pdf', '.doc', '.docx', '.txt']
-    }
+    # Allow all file extensions
+    ALLOWED_EXTENSIONS = None
     
     MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
     
     @classmethod
-    def validate_file(cls, file: UploadedFile, file_type='image'):
+    def validate_file(cls, file: UploadedFile, file_type=None):
         """
-        Validate uploaded file.
-        
+        Validate uploaded file (only checks file size, allows all file types).
         Args:
             file: The uploaded file
-            file_type: Type of file ('image', 'pdf', 'document')
-        
+            file_type: Ignored (kept for compatibility)
         Raises:
             ValidationError: If file is invalid
         """
         if not file:
             return
-        
         # Check file size
         if file.size > cls.MAX_FILE_SIZE:
             raise ValidationError(
                 f'File size too large. Maximum allowed size is {cls.MAX_FILE_SIZE / (1024*1024):.1f}MB'
             )
-        
-        # Check file extension
-        file_extension = os.path.splitext(file.name)[1].lower()
-        allowed_extensions = cls.ALLOWED_EXTENSIONS.get(file_type, [])
-        
-        if file_extension not in allowed_extensions:
-            raise ValidationError(
-                f'Invalid file type. Allowed types: {", ".join(allowed_extensions)}'
-            )
-        
-        # Additional validation for images
-        if file_type == 'image':
-            cls._validate_image(file)
     
     @classmethod
     def _validate_image(cls, file: UploadedFile):
@@ -74,17 +55,17 @@ class TransactionFileValidator:
 
 def validate_barcode_image(file):
     """Validator for barcode image files."""
-    TransactionFileValidator.validate_file(file, 'image')
+    TransactionFileValidator.validate_file(file)
 
 
 def validate_pdf_document(file):
     """Validator for PDF documents."""
-    TransactionFileValidator.validate_file(file, 'pdf')
+    TransactionFileValidator.validate_file(file)
 
 
 def validate_supporting_document(file):
     """Validator for supporting documents."""
-    TransactionFileValidator.validate_file(file, 'document')
+    TransactionFileValidator.validate_file(file)
 
 
 class GCPStorageHelper:
