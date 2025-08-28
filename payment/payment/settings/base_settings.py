@@ -199,12 +199,12 @@ TEMPLATES = [
 ]
 
 # Default database configuration (can be overridden in dev/prod settings)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 WSGI_APPLICATION = 'payment.payment.wsgi.application'
 
