@@ -236,7 +236,7 @@ class AdminTransactionListSerializer(serializers.ModelSerializer):
     """
     user_email = serializers.EmailField(source='user.email', read_only=True)
     user_full_name = serializers.SerializerMethodField()
-    user_id = serializers.IntegerField(source='user.id', read_only=True)
+    user_id = serializers.CharField(source='user.id', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     currency_display = serializers.CharField(source='get_currency_display', read_only=True)
     
@@ -277,7 +277,7 @@ class AdminTransactionDetailSerializer(serializers.ModelSerializer):
     """
     user_email = serializers.EmailField(source='user.email', read_only=True)
     user_full_name = serializers.SerializerMethodField()
-    user_id = serializers.IntegerField(source='user.id', read_only=True)
+    user_id = serializers.CharField(source='user.id', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     currency_display = serializers.CharField(source='get_currency_display', read_only=True)
     

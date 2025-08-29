@@ -25,6 +25,11 @@ logger = logging.getLogger(__name__)
 
 
 class TransactionViewSet(viewsets.ModelViewSet):
+    pagination_class = None  # Will be set below
+from payment.apps.common.pagination import GenericPagination
+
+class TransactionViewSet(viewsets.ModelViewSet):
+    pagination_class = GenericPagination
     """
     ViewSet for handling user transactions.
     
@@ -641,6 +646,7 @@ class TransactionViewSet(viewsets.ModelViewSet):
 
 
 class AdminTransactionViewSet(viewsets.ModelViewSet):
+    pagination_class = GenericPagination
     """
     ViewSet for admin transaction management.
     
