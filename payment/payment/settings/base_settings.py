@@ -14,6 +14,8 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from corsheaders.defaults import default_headers
+import json
+from google.oauth2 import service_account
 
 from payment.configurations import (
     ENABLE_SOCIAL_AUTH,
@@ -34,9 +36,6 @@ from payment.configurations import (
     SOCIAL_AUTH_GOOGLE_OAUTH2_KEY,
     SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET,
     SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE,
-    CLOUDINARY_CLOUD_NAME,
-    CLOUDINARY_API_KEY,
-    CLOUDINARY_API_SECRET,
     USE_GCP_STORAGE,
     GCP_PROJECT_ID,
     GCP_STORAGE_BUCKET_NAME,
@@ -62,6 +61,39 @@ from payment.configurations import (
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 PROJECT_ROOT = BASE_DIR.parent
 
+# Force Google Cloud Platform Storage as the only backend
+# DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+# STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+GS_BUCKET_NAME = GCP_STORAGE_BUCKET_NAME
+GS_PROJECT_ID = GCP_PROJECT_ID
+GS_LOCATION = GCP_LOCATION
+GS_FILE_OVERWRITE = GCP_FILE_OVERWRITE
+GS_DEFAULT_ACL = GCP_DEFAULT_ACL
+
+# Service account authentication
+if GCP_SERVICE_ACCOUNT_FILE:
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+        GCP_SERVICE_ACCOUNT_FILE
+    )
+elif GCP_SERVICE_ACCOUNT_JSON:
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_info(
+        json.loads(GCP_SERVICE_ACCOUNT_JSON)
+    )
+
+
+# Media URLs
+MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -75,6 +107,8 @@ ALLOWED_HOSTS = ALLOWED_HOSTS
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
     "ngrok-skip-browser-warning",
+    "content-disposition",
+    "x-custom-header",
 ]
 
 SESSION_COOKIE_SAMESITE = None
@@ -114,11 +148,10 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_spectacular',
     'django_filters',
-    'cloudinary_storage',
-    'cloudinary',
     'django_redis',
     'djoser',
     'social_django',
+    'storages',  # Added for Google Cloud Storage backend
     # Django's default apps
     'django.contrib.admin',
     'django.contrib.auth',
@@ -230,48 +263,6 @@ STRIPE_SECRET_KEY = STRIPE_SECRET_KEY
 STRIPE_PUBLISHABLE_KEY = STRIPE_PUBLISHABLE_KEY
 STRIPE_WEBHOOK_SECRET = STRIPE_WEBHOOK_SECRET
 
-# File Storage Configuration
-if USE_GCP_STORAGE:
-    # Google Cloud Platform Storage
-    DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-    STATICFILES_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-    
-    GS_BUCKET_NAME = GCP_STORAGE_BUCKET_NAME
-    GS_PROJECT_ID = GCP_PROJECT_ID
-    GS_LOCATION = GCP_LOCATION
-    GS_FILE_OVERWRITE = GCP_FILE_OVERWRITE
-    GS_DEFAULT_ACL = GCP_DEFAULT_ACL
-    
-    # Service account authentication
-    if GCP_SERVICE_ACCOUNT_FILE:
-        GS_CREDENTIALS = GCP_SERVICE_ACCOUNT_FILE
-    elif GCP_SERVICE_ACCOUNT_JSON:
-        import json
-        from google.oauth2 import service_account
-        GS_CREDENTIALS = service_account.Credentials.from_service_account_info(
-            json.loads(GCP_SERVICE_ACCOUNT_JSON)
-        )
-    
-    # Media URLs
-    GS_MEDIA_BUCKET_NAME = GCP_STORAGE_BUCKET_NAME
-    MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
-    
-else:
-    # Cloudinary Storage (fallback)
-    CLOUDINARY_STORAGE = {
-        'CLOUD_NAME': CLOUDINARY_CLOUD_NAME,
-        'API_KEY': CLOUDINARY_API_KEY,
-        'API_SECRET': CLOUDINARY_API_SECRET,
-    }
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    
-    # Import cloudinary after settings are defined to avoid circular imports
-    import cloudinary
-    cloudinary.config(
-        cloud_name=CLOUDINARY_CLOUD_NAME,
-        api_key=CLOUDINARY_API_KEY,
-        api_secret=CLOUDINARY_API_SECRET,
-    )
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -304,9 +295,6 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = 'static/'
-
-MEDIA_URL = 'media/'
-MEDIA_ROOT = 'media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
