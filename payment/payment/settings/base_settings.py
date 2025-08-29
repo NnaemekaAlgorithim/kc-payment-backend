@@ -111,6 +111,15 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     "x-custom-header",
 ]
 
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
 SESSION_COOKIE_SAMESITE = None
 SESSION_COOKIE_SECURE = True
 
